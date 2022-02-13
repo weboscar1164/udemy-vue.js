@@ -14,6 +14,9 @@
 import { hokkaidoNumber } from "@/hokkaidoNumber";
 export default {
 	mixins: [hokkaidoNumber],
+	created() {
+		console.log("created in components");
+	},
 
 	//カスタムディレクティブの作成（local）
 	//directives内ではthisは使用できない

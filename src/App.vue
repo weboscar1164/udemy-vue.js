@@ -1,5 +1,25 @@
 <template>
 	<div>
+		<div class="toggleOpacity">
+			<button @click="show = !show">change</button>
+			<transition name="fade">
+				<p v-if="show">Hello</p>
+			</transition>
+			<transition
+				enter-class=""
+				enter-active-class="animate__animated animate__bounce"
+				enter-to-class=""
+				leave-class=""
+				leave-active-class="animate__animated animate__shake"
+				leave-to-class=""
+			>
+				<p v-if="show">Hello</p>
+			</transition>
+			<transition name="slide" type="animation" appear>
+				<p v-if="show">bye</p>
+			</transition>
+		</div>
+
 		<likeHeader>
 			<template #[title]="slotProps">
 				<h1>トータルのいいね数</h1>
@@ -122,6 +142,7 @@ export default {
 	},
 	data() {
 		return {
+			show: true,
 			totalNumber: 14,
 			title: "title",
 			currentComponent: "Home",
@@ -147,6 +168,61 @@ export default {
 };
 </script>
 <style scoped>
+/* トランジショングループの作成 */
+.fade-enter {
+	opacity: 0;
+	/* 出現するときの最初の状態 */
+}
+.fade-enter-active {
+	transition: opacity 0.5s ease;
+	/* 出現時のトランジションの状態 */
+}
+.fade-enter-to {
+	opacity: 1;
+	/* 出現時の最後の状態 */
+}
+.fade-leave {
+	opacity: 1;
+	/* 消えるときの最初の状態 */
+}
+.fade-leave-active {
+	transition: opacity 0.5s ease;
+	/* 消えるときのトランジションの状態 */
+}
+.fade-leave-to {
+	opacity: 0;
+	/* 消えるときの最後の状態 */
+}
+
+/* animationの作成 出現時のanimationのみの作成で出現、削除の両方対応できる */
+.slide-enter,
+.slide-leave-to {
+	opacity: 0;
+}
+.slide-enter-active {
+	animation: slide-in 0.5s;
+	transition: opacity 0.5s;
+}
+.slide-leave-active {
+	animation: slide-in 0.5s reverse;
+	transition: opacity 0.5s;
+}
+
+@keyframes slide-in {
+	from {
+		transform: translateX(100px);
+	}
+
+	to {
+		transform: translateX(0);
+	}
+}
+.toggleOpacity {
+	width: 70%;
+	margin: 0 auto;
+	padding-top: 5rem;
+	text-align: center;
+}
 /* div {
 	border: 1px solid blue;
 }*/

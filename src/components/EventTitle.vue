@@ -1,6 +1,8 @@
 <template>
 	<div>
-		<label for="title">タイトル</label>
+		<label class="animate__animeted animate__bounce" for="title"
+			>タイトル</label
+		>
 		<input
 			type="text"
 			:value="value"

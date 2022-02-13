@@ -12,6 +12,9 @@ export const hokkaidoNumber = {
 			return value.toLowerCase();
 		},
 	},
+	created() {
+		console.log("created in mixin");
+	},
 	directives: {
 		border2(el, binding) {
 			//省略記法（bindとupdateはほとんど同じ記述となり、他のメソッドはあまり使われないのでまとめてfunctionで宣言できる

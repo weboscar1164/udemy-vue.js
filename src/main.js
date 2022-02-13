@@ -42,6 +42,14 @@ Vue.filter("upperCase", function (value) {
 	return value.toUpperCase();
 });
 
+//グローバルでmixinを使用する場合は発火するタイミングが多いのでかなり注意する必要がある
+//通常は使わない
+Vue.mixin({
+	created() {
+		console.log("grobal mixin");
+	},
+});
+
 new Vue({
 	render: (h) => h(App),
 }).$mount("#app");
