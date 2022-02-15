@@ -1,21 +1,84 @@
 <template>
 	<div>
 		<div class="toggleOpacity">
+			<!-- transitionのnameは動的に切り替えられる -->
+			<div>
+				<button @click="myAnimation = 'slide'">Slide</button>
+				<button @click="myAnimation = 'fade'">Fade</button>
+				<p>myAnimation: {{ myAnimation }}</p>
+			</div>
+
+			<br />
+			<button @click="add()">add</button>
+			<FadeGroup>
+				<li
+					style="
+						cursor: pointer;
+						background: lightgray;
+						height: 1.6rem;
+						border-radius: 0.8rem;
+						margin-top: 0.5rem;
+					"
+					v-for="(number, index) in numbers"
+					:key="number"
+					@click="remove(index)"
+				>
+					{{ number }}
+				</li>
+			</FadeGroup>
+
+			<!-- componentの切り替えをtransitionで制御する -->
+			<div>
+				<button @click="myComponent = 'componentA'">componentA</button>
+				<button @click="myComponent = 'componentB'">componentB</button>
+				<transition name="fade" mode="out-in">
+					<component :is="myComponent"></component>
+				</transition>
+			</div>
+			<br />
 			<button @click="show = !show">change</button>
-			<transition name="fade">
-				<p v-if="show">Hello</p>
-			</transition>
+			<br />
+
+			<!-- Javascriptフックを用いてtransitonを作成 -->
+			<!-- Javascriptフックのみ使用する場合は:css="false"を明示的に指定 -->
+			<!-- <transition
+				:css="false"
+				@before-enter="beforEnter"
+				@enter="enter"
+				@after-enter="afterEnter"
+				@enter-cancelled="enterCancelled"
+				@before-leave="beforLeave"
+				@leave="leave"
+				@after-leave="afterLeave"
+				@leave-cancelled="leaveCancelled"
+			> -->
 			<transition
-				enter-class=""
+				:css="false"
+				@before-enter="beforEnter"
+				@enter="enter"
+				@leave="leave"
+			>
+				<div class="circle" v-if="show"></div>
+			</transition>
+
+			<!-- 複数の要素をtransitionグループに使うときはv-ifを使う -->
+			<!-- 複数の要素を切り替えるときに切り替えタイミングをmode属性で切り替える -->
+			<transition name="fade" mode="out-in">
+				<p v-if="show" key="night">Good night!</p>
+				<p v-else key="morning">Good morning!</p>
+			</transition>
+			<!-- 外部プラグインなどclassを切り替えるときはenter-classとleave-classを使用する -->
+			<transition
+				name="fade"
 				enter-active-class="animate__animated animate__bounce"
 				enter-to-class=""
-				leave-class=""
-				leave-active-class="animate__animated animate__shake"
+				leave-active-class="animate__animated animate__shakeY"
 				leave-to-class=""
+				appear
 			>
 				<p v-if="show">Hello</p>
 			</transition>
-			<transition name="slide" type="animation" appear>
+			<transition :name="myAnimation" appear>
 				<p v-if="show">bye</p>
 			</transition>
 		</div>
@@ -127,21 +190,31 @@
 	</div>
 </template>
 <script>
+import FadeGroup from "./components/FadeGroup.vue";
 import likeHeader from "@/components/likeHeader.vue";
 import About from "./components/About.vue";
 import Home from "./components/Home.vue";
 import EventTitle from "./components/EventTitle.vue";
 import CountNumber from "./components/CountNumber.vue";
+import componentA from "./components/ComponentA.vue";
+import componentB from "./components/ComponentB.vue";
 export default {
 	components: {
+		FadeGroup,
 		likeHeader,
 		About,
 		Home,
 		EventTitle,
 		CountNumber,
+		componentA,
+		componentB,
 	},
 	data() {
 		return {
+			nextNumber: 3,
+			numbers: [0, 1, 2],
+			myComponent: "componentA",
+			myAnimation: "slide",
 			show: true,
 			totalNumber: 14,
 			title: "title",
@@ -161,6 +234,64 @@ export default {
 	},
 
 	methods: {
+		randomIndex() {
+			return Math.floor(Math.random() * this.numbers.length);
+		},
+		add() {
+			this.numbers.splice(this.randomIndex(), 0, this.nextNumber);
+			this.nextNumber += 1;
+		},
+		remove(index) {
+			this.numbers.splice(index, 1);
+		},
+
+		//JavaScriptフック
+		beforEnter(el) {
+			el.style.transform = "scale(0)";
+			//現れる前
+		},
+		enter(el, done) {
+			let scale = 0;
+			const interval = setInterval(() => {
+				el.style.transform = `scale(${scale})`;
+				scale += 0.05;
+				if (scale >= 1) {
+					clearInterval(interval);
+					done();
+				}
+			}, 20);
+			//現れるとき
+			//引数doneはcssを併記したときには必要ない（css併記しないときは必須）
+			//併記したときには長いほうが適用されるが、doneをつけることでcssが途中でも処理が停止する
+		},
+		// afterEnter(el) {
+		// 	//現れたあと
+		// },
+		// enterCancelled(el) {
+		// 	//現れるアニメーションがキャンセルされたとき
+		// },
+		// beforeLeave(el) {
+		// 	//消える前
+		// },
+		leave(el, done) {
+			let scale = 1;
+			const interval = setInterval(() => {
+				el.style.transform = `scale(${scale})`;
+				scale -= 0.05;
+				if (scale <= 0) {
+					clearInterval(interval);
+					done();
+				}
+			}, 20);
+			//消えるとき
+		},
+		// afterLeave(el) {
+		// 	//消えたあと
+		// },
+		// leaveCancelled(el) {
+		// 	//消えるアニメーションがキャンセルされたとき
+		// 	//v-showを使用したときのみ適用される
+		// },
 		incrementNumber(value) {
 			this.totalNumber = value;
 		},
@@ -168,7 +299,17 @@ export default {
 };
 </script>
 <style scoped>
+.circle {
+	width: 200px;
+	height: 200px;
+	margin: 1rem auto;
+	border-radius: 100px;
+	background: deeppink;
+}
 /* トランジショングループの作成 */
+.fade-move {
+	transition: transform 1s;
+}
 .fade-enter {
 	opacity: 0;
 	/* 出現するときの最初の状態 */
@@ -187,6 +328,8 @@ export default {
 }
 .fade-leave-active {
 	transition: opacity 0.5s ease;
+	position: absolute;
+	width: 100%;
 	/* 消えるときのトランジションの状態 */
 }
 .fade-leave-to {
