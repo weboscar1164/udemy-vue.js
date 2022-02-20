@@ -1,6 +1,8 @@
 import Vue from "vue";
 import App from "./App.vue";
 import likeNumber from "./components/likeNumber.vue";
+import router from "./router";
+import store from "./store/index";
 
 Vue.config.productionTip = false;
 Vue.component("likeNumber", likeNumber);
@@ -46,10 +48,18 @@ Vue.filter("upperCase", function (value) {
 //通常は使わない
 Vue.mixin({
 	created() {
-		console.log("grobal mixin");
+		// console.log("grobal mixin");
 	},
 });
 
+//グローバルにページ遷移時の処理を指定する
+router.beforeEach((to, from, next) => {
+	console.log("grobal-before-each");
+	next();
+});
+
 new Vue({
+	router,
+	store,
 	render: (h) => h(App),
 }).$mount("#app");

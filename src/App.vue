@@ -1,5 +1,13 @@
 <template>
 	<div>
+		<div style="width: 70%; margin: 0 auto; padding-top: 2rem">
+			<router-view name="header"></router-view>
+			<transition name="fade" mode="out-in" @before-enter="scrollBeforeEnter">
+				<router-view></router-view>
+			</transition>
+		</div>
+		<br />
+		<hr />
 		<div class="toggleOpacity">
 			<!-- transitionのnameは動的に切り替えられる -->
 			<div>
@@ -109,7 +117,7 @@
 		<keep-alive>
 			<component :is="currentComponent"></component>
 		</keep-alive>
-		<div>
+		<div id="form">
 			<h2>イベントのフォーム</h2>
 
 			<EventTitle v-model="eventData.title"></EventTitle>
@@ -234,6 +242,9 @@ export default {
 	},
 
 	methods: {
+		scrollBeforeEnter() {
+			this.$root.$emit("triggerScroll");
+		},
 		randomIndex() {
 			return Math.floor(Math.random() * this.numbers.length);
 		},
@@ -306,9 +317,10 @@ export default {
 	border-radius: 100px;
 	background: deeppink;
 }
+
 /* トランジショングループの作成 */
 .fade-move {
-	transition: transform 1s;
+	transition: transform 0.5s;
 }
 .fade-enter {
 	opacity: 0;
